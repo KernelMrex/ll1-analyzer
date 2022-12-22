@@ -1,12 +1,12 @@
 package recfall
 
 import (
-	"container/list"
+	"github.com/golang-collections/collections/stack"
 	"io"
 )
 
 func IsValid(in io.Reader) bool {
-	if err := fnProg(in, list.New()); err != nil {
+	if err := fnProg(in, stack.New()); err != nil {
 		return false
 	}
 
