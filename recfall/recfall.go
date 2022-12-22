@@ -1,8 +1,14 @@
 package recfall
 
-import "io"
+import (
+	"container/list"
+	"io"
+)
 
 func IsValid(in io.Reader) bool {
+	if err := fnProg(in, list.New()); err != nil {
+		return false
+	}
 
 	return true
 }
