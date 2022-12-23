@@ -1,12 +1,12 @@
 package recfall
 
 import (
-	"container/list"
 	"errors"
+	"github.com/golang-collections/collections/stack"
 	"io"
 )
 
-func fnProg(in io.Reader, stack *list.List) error {
+func fnProg(in io.Reader, stack *stack.Stack) error {
 	if ReadChar(in) != 'P' {
 		return errors.New("unexpected char")
 	}
@@ -46,7 +46,7 @@ func fnProg(in io.Reader, stack *list.List) error {
 	return nil
 }
 
-func fnVar(in io.Reader, stack *list.List) error {
+func fnVar(in io.Reader, stack *stack.Stack) error {
 	if ReadChar(in) != 'V' {
 		return errors.New("unexpected char")
 	}
@@ -70,7 +70,7 @@ func fnVar(in io.Reader, stack *list.List) error {
 	return nil
 }
 
-func fnIdList(in io.Reader, stack *list.List) error {
+func fnIdList(in io.Reader, stack *stack.Stack) error {
 	if ReadChar(in) != 'i' {
 		return errors.New("unexpected char")
 	}
@@ -79,19 +79,21 @@ func fnIdList(in io.Reader, stack *list.List) error {
 		return errors.New("unexpected char")
 	}
 
-	if ReadChar(in) != ' ' {
-		return errors.New("unexpected char")
-	}
-
+	stack.Push(ReadChar(in))
 	if err := fnIdListA(in, stack); err != nil {
 		return err
 	}
 
-	e := stack.Front()
-	ch := e.Value
-	stack.Remove(e)
+	if stack.Len() == 0 {
+		return errors.New("unexpected end of file")
+	}
+	ch := stack.Pop().(byte)
 
 	if ch != ':' {
+		return errors.New("unexpected char")
+	}
+
+	if ReadChar(in) != ' ' {
 		return errors.New("unexpected char")
 	}
 
@@ -102,8 +104,8 @@ func fnIdList(in io.Reader, stack *list.List) error {
 	return nil
 }
 
-func fnIdListA(in io.Reader, stack *list.List) error {
-	ch := ReadChar(in)
+func fnIdListA(in io.Reader, stack *stack.Stack) error {
+	ch := stack.Pop().(byte)
 
 	if ch == ',' {
 		if ReadChar(in) != ' ' {
@@ -117,14 +119,19 @@ func fnIdListA(in io.Reader, stack *list.List) error {
 		if ReadChar(in) != 'd' {
 			return errors.New("unexpected char")
 		}
+
+		stack.Push(ReadChar(in))
+		if err := fnIdListA(in, stack); err != nil {
+			return err
+		}
 	} else {
-		stack.PushFront(ch)
+		stack.Push(ch)
 	}
 
 	return nil
 }
 
-func fnType(in io.Reader, stack *list.List) error {
+func fnType(in io.Reader, stack *stack.Stack) error {
 	ch := ReadChar(in)
 
 	if ch == 'i' {
