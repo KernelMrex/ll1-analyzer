@@ -3,15 +3,36 @@ package recfall
 import (
 	"errors"
 	"fmt"
+	"github.com/golang-collections/collections/stack"
 	"io"
 	"strings"
 )
 
-func parseListSt() error {
-	return nil
+func parseListSt(in io.Reader, stack *stack.Stack) error {
+	err := ParseSt(in, stack)
+	if err != nil {
+		return err
+	}
+
+	return parseB(in, stack)
 }
 
-func ParseSt(in io.Reader) error {
+func parseB(in io.Reader, stack *stack.Stack) error {
+	if ch := ReadChar(in); ch == ' ' {
+		return nil
+	} else {
+		stack.Push(ch)
+	}
+
+	err := ParseSt(in, stack)
+	if err != nil {
+		return err
+	}
+
+	return parseB(in, stack)
+}
+
+func ParseSt(in io.Reader, stack *stack.Stack) error {
 	var word []byte
 	for ch := ReadChar(in); ch != '(' && ch != ':'; ch = ReadChar(in) {
 		fmt.Println(ch)
@@ -23,18 +44,21 @@ func ParseSt(in io.Reader) error {
 
 	switch strWord {
 	case "read":
-		return parseRead(in)
+		return parseRead(in, stack)
 	case "write":
-		return parseWrite(in)
+		return parseWrite(in, stack)
 	case "id":
-		return parseAssign(in)
+		return parseAssign(in, stack)
 	default:
 		return errors.New("excepted read, write or assign")
 	}
 }
 
-func parseRead(in io.Reader) error {
-	//err = parseIDList()
+func parseRead(in io.Reader, stack *stack.Stack) error {
+	err := fnIdList(in, stack)
+	if err != nil {
+		return err
+	}
 
 	if ch := ReadChar(in); ch != ')' {
 		return errors.New("excepted read")
@@ -42,8 +66,11 @@ func parseRead(in io.Reader) error {
 	return nil
 }
 
-func parseWrite(in io.Reader) error {
-	//err = parseIDList()
+func parseWrite(in io.Reader, stack *stack.Stack) error {
+	err := fnIdList(in, stack)
+	if err != nil {
+		return err
+	}
 
 	if ch := ReadChar(in); ch != ')' {
 		return errors.New("excepted assign")
@@ -51,7 +78,7 @@ func parseWrite(in io.Reader) error {
 	return nil
 }
 
-func parseAssign(in io.Reader) error {
+func parseAssign(in io.Reader, stack *stack.Stack) error {
 	if ch := ReadChar(in); ch != '=' {
 		return errors.New("excepted assign")
 	}
@@ -60,6 +87,5 @@ func parseAssign(in io.Reader) error {
 		return errors.New("excepted assign")
 	}
 
-	return nil
-	// return parseExp
+	return parseExp(in, stack)
 }

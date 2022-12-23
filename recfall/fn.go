@@ -43,6 +43,11 @@ func fnProg(in io.Reader, stack *stack.Stack) error {
 		return err
 	}
 
+	err := parseListSt(in, stack)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
