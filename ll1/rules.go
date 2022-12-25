@@ -67,11 +67,7 @@ func ruleProg(in io.Reader, stack *stack.Stack) error {
 		return err
 	}
 
-	if stack.Pop().(byte) != ' ' {
-		return errors.New("unexpected char")
-	}
-
-	if ReadChar(in) != 'e' {
+	if stack.Pop().(byte) != 'e' {
 		return errors.New("unexpected char")
 	}
 	if ReadChar(in) != 'n' {
@@ -226,94 +222,6 @@ func ruleType(in io.Reader, _ *stack.Stack) error {
 	return nil
 }
 
-func ruleExp(in io.Reader, stack *stack.Stack) error {
-	if err := ruleT(in, stack); err != nil {
-		return err
-	}
-
-	if err := ruleExpA(in, stack); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func ruleT(in io.Reader, stack *stack.Stack) error {
-	if err := ruleF(in, stack); err != nil {
-		return err
-	}
-
-	return ruleTA(in, stack)
-}
-
-func ruleExpA(in io.Reader, stack *stack.Stack) error {
-	if ch := ReadChar(in); ch == ' ' || ch == ';' {
-		return nil
-	} else {
-		stack.Push(ch)
-	}
-
-	if stack.Pop().(byte) != '+' {
-		return errors.New("invalid arg")
-	}
-
-	if err := ruleT(in, stack); err != nil {
-		return err
-	}
-
-	return ruleExpA(in, stack)
-}
-
-func ruleF(in io.Reader, stack *stack.Stack) error {
-	switch ReadChar(in) {
-	case '-':
-		return ruleF(in, stack)
-	case '(':
-		if err := ruleExp(in, stack); err != nil {
-			return err
-		}
-
-		if ch := ReadChar(in); ch != ')' {
-			return errors.New("invalid arg")
-		}
-		return nil
-	case 'i':
-		if ch := ReadChar(in); ch != 'd' {
-			return errors.New("invalid arg")
-		}
-		return nil
-	case 'n':
-		if ch := ReadChar(in); ch != 'u' {
-			return errors.New("invalid arg")
-		}
-		if ch := ReadChar(in); ch != 'm' {
-			return errors.New("invalid arg")
-		}
-		return nil
-	default:
-		return nil
-	}
-}
-
-func ruleTA(in io.Reader, stack *stack.Stack) error {
-	if ch := ReadChar(in); ch == ' ' {
-		return nil
-	} else {
-		stack.Push(ch)
-	}
-
-	if stack.Pop().(byte) != '+' {
-		return errors.New("invalid arg")
-	}
-
-	err := ruleF(in, stack)
-	if err != nil {
-		return errors.New("invalid arg")
-	}
-
-	return ruleTA(in, stack)
-}
-
 func ruleListSt(in io.Reader, stack *stack.Stack) error {
 	ch := ReadChar(in)
 	stack.Push(ch)
@@ -342,6 +250,10 @@ func ruleListStA(in io.Reader, stack *stack.Stack) error {
 
 	if err := ruleSt(in, stack); err != nil {
 		return err
+	}
+
+	if ReadChar(in) != ' ' {
+		return errors.New("unexpected char")
 	}
 
 	stack.Push(ReadChar(in))
@@ -458,8 +370,115 @@ func ruleAssign(in io.Reader, stack *stack.Stack) error {
 	if err := ruleExp(in, stack); err != nil {
 		return err
 	}
-	if ReadChar(in) != ';' {
+	if stack.Pop().(byte) != ';' {
 		return errors.New("unexpected char")
 	}
 	return nil
+}
+
+func ruleExp(in io.Reader, stack *stack.Stack) error {
+	stack.Push(ReadChar(in))
+	if err := ruleT(in, stack); err != nil {
+		return err
+	}
+
+	stack.Push(ReadChar(in))
+	if err := ruleExpA(in, stack); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ruleT(in io.Reader, stack *stack.Stack) error {
+	ch := stack.Peek().(byte)
+
+	if ch == '-' || ch == '(' || ch == 'i' || ch == 'n' {
+		return ruleF(in, stack)
+	}
+
+	return ruleTA(in, stack)
+}
+
+func ruleExpA(in io.Reader, stack *stack.Stack) error {
+	if stack.Peek().(byte) != ' ' {
+		return nil
+	}
+
+	if stack.Pop().(byte) != ' ' {
+		return errors.New("unexpected char")
+	}
+	if ReadChar(in) != '+' {
+		return errors.New("unexpected operation")
+	}
+	if ReadChar(in) != ' ' {
+		return errors.New("unexpected char")
+	}
+
+	stack.Push(ReadChar(in))
+	if err := ruleT(in, stack); err != nil {
+		return errors.New("invalid arg")
+	}
+
+	stack.Push(ReadChar(in))
+	return ruleExpA(in, stack)
+}
+
+func ruleF(in io.Reader, stack *stack.Stack) error {
+	switch stack.Pop().(byte) {
+	case '-':
+		stack.Push(ReadChar(in))
+		return ruleF(in, stack)
+	case '(':
+		stack.Push(ReadChar(in))
+		if err := ruleExp(in, stack); err != nil {
+			return err
+		}
+		if ReadChar(in) != ')' {
+			return errors.New("unexpected char")
+		}
+		return nil
+	case 'i':
+		if ReadChar(in) != 'd' {
+			return errors.New("unexpected char")
+		}
+		return nil
+	case 'n':
+		if ReadChar(in) != 'u' {
+			return errors.New("unexpected char")
+		}
+		if ReadChar(in) != 'm' {
+			return errors.New("unexpected char")
+		}
+		return nil
+	default:
+		return errors.New("unexpected char")
+	}
+}
+
+func ruleTA(in io.Reader, stack *stack.Stack) error {
+	if stack.Peek().(byte) != ' ' {
+		return nil
+	}
+
+	ch := stack.Pop().(byte)
+	if ch != ' ' {
+		return errors.New("unexpected char")
+	}
+
+	if ReadChar(in) != '*' {
+		return errors.New("unexpected operation")
+	}
+
+	if ReadChar(in) != ' ' {
+		return errors.New("unexpected char")
+	}
+
+	stack.Push(ReadChar(in))
+	if err := ruleF(in, stack); err != nil {
+		return errors.New("invalid arg")
+	}
+
+	stack.Push(ReadChar(in))
+	return ruleTA(in, stack)
 }
