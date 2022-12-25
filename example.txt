@@ -1,1 +1,1 @@
-PROG id VAR id : int begin read(id, id); id := id + (num); end
+PROG id VAR id : int begin read(id, id); id := id + ((--num)); end

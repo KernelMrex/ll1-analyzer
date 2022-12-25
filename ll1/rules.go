@@ -427,11 +427,10 @@ func ruleF(in io.Reader, stack *stack.Stack) error {
 		stack.Push(ReadChar(in))
 		return ruleF(in, stack)
 	case '(':
-		stack.Push(ReadChar(in))
 		if err := ruleExp(in, stack); err != nil {
 			return err
 		}
-		if ReadChar(in) != ')' {
+		if stack.Pop().(byte) != ')' {
 			return errors.New("unexpected char")
 		}
 		return nil
