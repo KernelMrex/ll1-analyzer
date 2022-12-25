@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"ll1_analyzer/ll1"
 	"os"
-	"rec_fall/ll1"
 )
 
 func main() {
