@@ -1,1 +1,1 @@
-PROG id VAR id, id: int
+PROG id VAR id, id: int begin READ(id); end
