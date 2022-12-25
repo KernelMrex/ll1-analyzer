@@ -23,10 +23,10 @@
 ```
 <PROG>    -> PROG id <VAR> begin <LISTST> end
 <VAR>     -> VAR <IDLIST> : <TYPE>
-<IDLIST>  -> id <IDLISTAA>
-<IDLISTA> -> ε | id <IDLISTA>
-<LISTST>  -> <ST><LISTSTA>
-<LISTSTA> -> <ST><LISTSTA> | ε
+<IDLIST>  -> id <IDLISTA>
+<IDLISTA> -> ε | , id <IDLISTA>
+<LISTST>  -> <ST> <LISTSTA>
+<LISTSTA> -> <ST> <LISTSTA> | ε
 <TYPE>    -> int|float|bool|string
 <ST>      -> <READ> | <WRITE> | <ASSIGN>
 <ASSIGN>  -> id := <EXP>;
