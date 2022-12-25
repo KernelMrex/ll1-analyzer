@@ -231,7 +231,11 @@ func ruleExp(in io.Reader, stack *stack.Stack) error {
 		return err
 	}
 
-	return ruleExpA(in, stack)
+	if err := ruleExpA(in, stack); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ruleT(in io.Reader, stack *stack.Stack) error {
@@ -243,7 +247,7 @@ func ruleT(in io.Reader, stack *stack.Stack) error {
 }
 
 func ruleExpA(in io.Reader, stack *stack.Stack) error {
-	if ch := ReadChar(in); ch == ' ' {
+	if ch := ReadChar(in); ch == ' ' || ch == ';' {
 		return nil
 	} else {
 		stack.Push(ch)
@@ -422,7 +426,7 @@ func ruleWrite(in io.Reader, stack *stack.Stack) error {
 	if err := ruleIdList(in, stack); err != nil {
 		return err
 	}
-	if ReadChar(in) != ')' {
+	if stack.Pop().(byte) != ')' {
 		return errors.New("unexpected char")
 	}
 	if ReadChar(in) != ';' {
