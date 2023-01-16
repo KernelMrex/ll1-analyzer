@@ -7,16 +7,16 @@ import (
 )
 
 func ruleProg(in io.Reader, stack *stack.Stack) error {
-	if ReadChar(in) != 'P' {
+	if ReadChar(in) != 'p' {
 		return errors.New("unexpected char")
 	}
-	if ReadChar(in) != 'R' {
+	if ReadChar(in) != 'r' {
 		return errors.New("unexpected char")
 	}
-	if ReadChar(in) != 'O' {
+	if ReadChar(in) != 'o' {
 		return errors.New("unexpected char")
 	}
-	if ReadChar(in) != 'G' {
+	if ReadChar(in) != 'g' {
 		return errors.New("unexpected char")
 	}
 
@@ -81,15 +81,15 @@ func ruleProg(in io.Reader, stack *stack.Stack) error {
 }
 
 func ruleVar(in io.Reader, stack *stack.Stack) error {
-	if ReadChar(in) != 'V' {
+	if ReadChar(in) != 'v' {
 		return errors.New("unexpected char")
 	}
 
-	if ReadChar(in) != 'A' {
+	if ReadChar(in) != 'a' {
 		return errors.New("unexpected char")
 	}
 
-	if ReadChar(in) != 'R' {
+	if ReadChar(in) != 'r' {
 		return errors.New("unexpected char")
 	}
 

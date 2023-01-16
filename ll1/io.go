@@ -6,12 +6,18 @@ import (
 )
 
 func ReadChar(in io.Reader) byte {
-	ch := make([]byte, 1)
-	if _, err := in.Read(ch); err != nil {
+	buf := make([]byte, 1)
+
+	if _, err := in.Read(buf); err != nil {
 		panic(err)
 	}
+	ch := buf[0]
 
-	fmt.Printf("%c %d\n", ch, ch)
+	if ch >= 'A' && ch <= 'Z' {
+		ch = ch - 'A' + 'a'
+	}
 
-	return ch[0]
+	fmt.Printf("[%c] %d\n", ch, ch)
+
+	return ch
 }
