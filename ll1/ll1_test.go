@@ -32,7 +32,9 @@ bEgIn
   write(  Id,   Id  );
   write(Id);
 
-  ID :=  id + ((--nUm));
+  ID :=  id    +   (  (  -  -  nUm  )  );
+
+  write(  Id,   Id  );
 
 eNd
 `

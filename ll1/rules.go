@@ -345,7 +345,6 @@ func ruleAssign(in Reader, stack *stack.Stack) error {
 	if in.Next() != '=' {
 		return errors.New("unexpected char")
 	}
-	in.SkipSpaces()
 	if err := ruleExp(in, stack); err != nil {
 		return err
 	}
@@ -356,12 +355,11 @@ func ruleAssign(in Reader, stack *stack.Stack) error {
 }
 
 func ruleExp(in Reader, stack *stack.Stack) error {
-	stack.Push(in.Next())
 	if err := ruleT(in, stack); err != nil {
 		return err
 	}
 
-	stack.Push(in.Next())
+	in.SkipSpaces()
 	if err := ruleExpA(in, stack); err != nil {
 		return err
 	}
@@ -370,7 +368,9 @@ func ruleExp(in Reader, stack *stack.Stack) error {
 }
 
 func ruleT(in Reader, stack *stack.Stack) error {
-	ch := stack.Peek().(byte)
+	in.SkipSpaces()
+	ch := in.Next()
+	stack.Push(ch)
 	if ch == '-' || ch == '(' || ch == 'i' || ch == 'n' {
 		return ruleF(in, stack)
 	}
@@ -379,30 +379,28 @@ func ruleT(in Reader, stack *stack.Stack) error {
 }
 
 func ruleExpA(in Reader, stack *stack.Stack) error {
-	if stack.Peek().(byte) != ' ' {
+	ch := in.Next()
+	if ch == ';' || ch == ')' {
+		stack.Push(ch)
 		return nil
 	}
 
-	if stack.Pop().(byte) != ' ' {
-		return errors.New("unexpected char")
-	}
-	if in.Next() != '+' {
+	if ch != '+' {
 		return errors.New("unexpected operation")
 	}
 	in.SkipSpaces()
-
-	stack.Push(in.Next())
 	if err := ruleT(in, stack); err != nil {
 		return errors.New("invalid arg")
 	}
 
-	stack.Push(in.Next())
+	in.SkipSpaces()
 	return ruleExpA(in, stack)
 }
 
 func ruleF(in Reader, stack *stack.Stack) error {
 	switch stack.Pop().(byte) {
 	case '-':
+		in.SkipSpaces()
 		stack.Push(in.Next())
 		return ruleF(in, stack)
 	case '(':
@@ -432,25 +430,19 @@ func ruleF(in Reader, stack *stack.Stack) error {
 }
 
 func ruleTA(in Reader, stack *stack.Stack) error {
-	if stack.Peek().(byte) != ' ' {
+	ch := in.Next()
+	if ch == ';' || ch == ')' {
+		stack.Push(ch)
 		return nil
 	}
-
-	if stack.Pop().(byte) != ' ' {
-		return errors.New("unexpected char")
-	}
-
-	if in.Next() != '*' {
+	if ch != '*' {
 		return errors.New("unexpected operation")
 	}
-
 	in.SkipSpaces()
-
-	stack.Push(in.Next())
 	if err := ruleF(in, stack); err != nil {
 		return errors.New("invalid arg")
 	}
 
-	stack.Push(in.Next())
+	in.SkipSpaces()
 	return ruleTA(in, stack)
 }
