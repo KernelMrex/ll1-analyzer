@@ -6,7 +6,7 @@ import (
 )
 
 func Process(in io.Reader) bool {
-	if err := ruleProg(in, stack.New()); err != nil {
+	if err := ruleProg(NewReader(in), stack.New()); err != nil {
 		return false
 	}
 	return true
