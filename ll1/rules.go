@@ -6,6 +6,7 @@ import (
 )
 
 func ruleProg(in Reader, stack *stack.Stack) error {
+	in.SkipSpaces()
 	if in.Next() != 'p' {
 		return errors.New("unexpected char")
 	}
@@ -19,9 +20,7 @@ func ruleProg(in Reader, stack *stack.Stack) error {
 		return errors.New("unexpected char")
 	}
 
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	if in.Next() != 'i' {
 		return errors.New("unexpected char")
@@ -30,17 +29,13 @@ func ruleProg(in Reader, stack *stack.Stack) error {
 		return errors.New("unexpected char")
 	}
 
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	if err := ruleVar(in, stack); err != nil {
 		return err
 	}
 
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	if in.Next() != 'b' {
 		return errors.New("unexpected char")
@@ -58,9 +53,7 @@ func ruleProg(in Reader, stack *stack.Stack) error {
 		return errors.New("unexpected char")
 	}
 
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	if err := ruleListSt(in, stack); err != nil {
 		return err
@@ -92,9 +85,7 @@ func ruleVar(in Reader, stack *stack.Stack) error {
 		return errors.New("unexpected char")
 	}
 
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	if err := ruleIdList(in, stack); err != nil {
 		return err
@@ -103,19 +94,12 @@ func ruleVar(in Reader, stack *stack.Stack) error {
 	if stack.Len() == 0 {
 		return errors.New("unexpected end of file")
 	}
-	ch := stack.Pop().(byte)
 
-	if ch != ' ' {
+	if stack.Pop().(byte) != ':' {
 		return errors.New("unexpected char")
 	}
 
-	if in.Next() != ':' {
-		return errors.New("unexpected char")
-	}
-
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	if err := ruleType(in, stack); err != nil {
 		return err
@@ -132,7 +116,8 @@ func ruleIdList(in Reader, stack *stack.Stack) error {
 		return errors.New("unexpected char")
 	}
 
-	stack.Push(in.Next())
+	in.SkipSpaces()
+
 	if err := ruleIdListA(in, stack); err != nil {
 		return err
 	}
@@ -141,12 +126,12 @@ func ruleIdList(in Reader, stack *stack.Stack) error {
 }
 
 func ruleIdListA(in Reader, stack *stack.Stack) error {
-	ch := stack.Pop().(byte)
+	ch := in.Next()
+
+	in.SkipSpaces()
 
 	if ch == ',' {
-		if in.Next() != ' ' {
-			return errors.New("unexpected char")
-		}
+
 		if in.Next() != 'i' {
 			return errors.New("unexpected char")
 		}
@@ -154,7 +139,8 @@ func ruleIdListA(in Reader, stack *stack.Stack) error {
 			return errors.New("unexpected char")
 		}
 
-		stack.Push(in.Next())
+		in.SkipSpaces()
+
 		if err := ruleIdListA(in, stack); err != nil {
 			return err
 		}
@@ -228,9 +214,7 @@ func ruleListSt(in Reader, stack *stack.Stack) error {
 		return err
 	}
 
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	stack.Push(in.Next())
 	if err := ruleListStA(in, stack); err != nil {
@@ -251,9 +235,7 @@ func ruleListStA(in Reader, stack *stack.Stack) error {
 		return err
 	}
 
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	stack.Push(in.Next())
 	if err := ruleListStA(in, stack); err != nil {
@@ -302,9 +284,11 @@ func ruleRead(in Reader, stack *stack.Stack) error {
 	if in.Next() != '(' {
 		return errors.New("unexpected char")
 	}
+	in.SkipSpaces()
 	if err := ruleIdList(in, stack); err != nil {
 		return err
 	}
+	in.SkipSpaces()
 	if stack.Pop().(byte) != ')' {
 		return errors.New("unexpected char")
 	}
@@ -333,9 +317,11 @@ func ruleWrite(in Reader, stack *stack.Stack) error {
 	if in.Next() != '(' {
 		return errors.New("unexpected char")
 	}
+	in.SkipSpaces()
 	if err := ruleIdList(in, stack); err != nil {
 		return err
 	}
+	in.SkipSpaces()
 	if stack.Pop().(byte) != ')' {
 		return errors.New("unexpected char")
 	}
@@ -352,18 +338,14 @@ func ruleAssign(in Reader, stack *stack.Stack) error {
 	if in.Next() != 'd' {
 		return errors.New("unexpected char")
 	}
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 	if in.Next() != ':' {
 		return errors.New("unexpected char")
 	}
 	if in.Next() != '=' {
 		return errors.New("unexpected char")
 	}
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 	if err := ruleExp(in, stack); err != nil {
 		return err
 	}
@@ -407,9 +389,7 @@ func ruleExpA(in Reader, stack *stack.Stack) error {
 	if in.Next() != '+' {
 		return errors.New("unexpected operation")
 	}
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	stack.Push(in.Next())
 	if err := ruleT(in, stack); err != nil {
@@ -464,9 +444,7 @@ func ruleTA(in Reader, stack *stack.Stack) error {
 		return errors.New("unexpected operation")
 	}
 
-	if in.Next() != ' ' {
-		return errors.New("unexpected char")
-	}
+	in.SkipSpaces()
 
 	stack.Push(in.Next())
 	if err := ruleF(in, stack); err != nil {

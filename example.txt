@@ -1,1 +1,7 @@
-PROG id VAR id : int begin read(id, id); id := id + ((--num)); end
+PROG id
+vAr
+  id: int
+bEgIn
+  reAD(Id, Id);
+  ID := id + ((--nUm));
+eNd

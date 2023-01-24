@@ -20,3 +20,24 @@ func TestSingleLineCaseInsensitive(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestMultiLineCaseInsensitive(t *testing.T) {
+	s := `
+PROG    id
+vAr
+  id: int
+bEgIn
+  reAD(  Id,   Id  );reAD(Id);
+
+  write(  Id,   Id  );
+  write(Id);
+
+  ID :=  id + ((--nUm));
+
+eNd
+`
+	r := strings.NewReader(s)
+	if !Process(r) {
+		t.Fail()
+	}
+}
