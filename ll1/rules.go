@@ -369,17 +369,16 @@ func ruleExp(in Reader, stack *stack.Stack) error {
 
 func ruleT(in Reader, stack *stack.Stack) error {
 	in.SkipSpaces()
-	ch := in.Next()
-	stack.Push(ch)
-	if ch == '-' || ch == '(' || ch == 'i' || ch == 'n' {
-		return ruleF(in, stack)
+	if err := ruleF(in, stack); err != nil {
+		return err
 	}
 
+	in.SkipSpaces()
 	return ruleTA(in, stack)
 }
 
 func ruleExpA(in Reader, stack *stack.Stack) error {
-	ch := in.Next()
+	ch := stack.Pop().(byte)
 	if ch == ';' || ch == ')' {
 		stack.Push(ch)
 		return nil
@@ -398,10 +397,9 @@ func ruleExpA(in Reader, stack *stack.Stack) error {
 }
 
 func ruleF(in Reader, stack *stack.Stack) error {
-	switch stack.Pop().(byte) {
+	switch in.Next() {
 	case '-':
 		in.SkipSpaces()
-		stack.Push(in.Next())
 		return ruleF(in, stack)
 	case '(':
 		if err := ruleExp(in, stack); err != nil {
@@ -431,7 +429,7 @@ func ruleF(in Reader, stack *stack.Stack) error {
 
 func ruleTA(in Reader, stack *stack.Stack) error {
 	ch := in.Next()
-	if ch == ';' || ch == ')' {
+	if ch == ';' || ch == ')' || ch == '+' {
 		stack.Push(ch)
 		return nil
 	}

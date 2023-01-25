@@ -34,7 +34,7 @@
 <ASSIGN>  -> id := <EXP>;
 <EXP>     -> <T><EXPA>
 <EXPA>    -> ε |  + <T><EXPA>
-<T>       -> <F> | <TA>
+<T>       -> <F><TA>
 <TA>      -> ε |  * <F><TA>
 <F>       -> -<F> | (<EXP>) | id | num
 ```

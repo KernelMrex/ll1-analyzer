@@ -53,7 +53,7 @@ func (r *skipSpacesReader) ReadChar() byte {
 }
 
 func isSpace(ch byte) bool {
-	return ch == ' ' || ch == '\n'
+	return ch == ' ' || ch == '\n' || ch == '\t'
 }
 
 func toLower(ch byte) byte {
