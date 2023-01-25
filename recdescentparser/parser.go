@@ -1,4 +1,4 @@
-package ll1
+package recdescentparser
 
 import (
 	"github.com/golang-collections/collections/stack"

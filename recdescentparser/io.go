@@ -1,4 +1,4 @@
-package ll1
+package recdescentparser
 
 import (
 	"fmt"
